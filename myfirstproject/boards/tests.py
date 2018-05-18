@@ -3,22 +3,31 @@ from django.test import TestCase
 # Create your tests here.
 from django.urls import resolve, reverse
 
-from boards.models import Board
+from .models import Board
 from .views import home, board_topics
 
 
 class HomeTests(TestCase):
-    def test_home_view_status_code(self):
+    def setUp(self):
+        self.board = Board.objects.create(name='Django', description='Django Board.')
         # reverse的第一个参数是urls.py的url中的name
         url = reverse('home')
-        response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.response = self.client.get(url)
+
+    def test_home_view_status_code(self):
+        self.assertEquals(self.response.status_code, 200)
 
     def test_home_url_resolves_home_view(self):
         #
         view = resolve('/')
         self.assertEquals(view.url_name, 'home')
         self.assertEquals(view.func, home)
+
+    def test_home_view_contains_link_to_topics_page(self):
+        board_topics_url = reverse('board_topics', kwargs={'pk': self.board.pk})
+        # assertContains ⽅法来测试 response 主体部分是否包含给定的⽂本。
+        # 测试 response 主体是否包含⽂本 href="/boards/1/"
+        self.assertContains(self.response, 'href="{0}"'.format(board_topics_url))
 
 
 class BoardTopicsTests(TestCase):
@@ -39,3 +48,9 @@ class BoardTopicsTests(TestCase):
     def test_board_topics_url_resolves_board_topics_view(self):
         view = resolve('/boards/1/')
         self.assertEquals(view.func, board_topics)
+
+    def test_board_topics_view_contains_link_back_to_homepage(self):
+        board_topics_url = reverse('board_topics', kwargs={'pk': 1})
+        response = self.client.get(board_topics_url)
+        homepage_url = reverse('home')
+        self.assertContains(response, 'href="{0}"'.format(homepage_url))
