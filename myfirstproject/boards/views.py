@@ -1,7 +1,8 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, Http404
+from django.contrib.auth.models import User
+from django.shortcuts import render, get_object_or_404, redirect
 
-from .models import Board
+from .forms import NewTopicForm
+from .models import Board, Topic, Post
 
 
 # Create your views here.
@@ -22,3 +23,25 @@ def board_topics(request, pk):
     # Django 有⼀个快捷⽅式去得到⼀个对象，或者返回⼀个不存在的对象 404。
     board = get_object_or_404(Board, pk=pk)
     return render(request, 'topics.html', {'board': board})
+
+
+def new_topic(request, pk):
+    board = get_object_or_404(Board, pk=pk)
+    user = User.objects.first()
+    if request.method == 'POST':
+        # 实例化⼀个将 POST 数据传递给 form 的form 实例：
+        form = NewTopicForm(request.POST)
+        # 检查 form 是否有效
+        if form.is_valid():
+            topic = form.save(commit=False)
+            topic.board = board
+            topic.starter = user
+            topic.save()
+
+            post = Post.objects.create(message=form.cleaned_data.get('message'),
+                                       topic=topic,
+                                       created_by=user)
+            return redirect('board_topics', pk=board.pk)
+    else:
+        form = NewTopicForm()
+    return render(request, 'new_topic.html', {'board': board, 'form': form})

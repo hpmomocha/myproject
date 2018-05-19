@@ -7,5 +7,31 @@
         <li class="breadcrumb-item active">{{ board.name }}</li>
 {% endblock %}
 {% block content %}
-
+    <div class="mb-4">
+        <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New topic</a>
+    </div>
+    <table class="table">
+        <thead class="thead-inverse">
+            <tr>
+                <th>Topic</th>
+                <th>Starter</th>
+                <th>Replies</th>
+                <th>Views</th>
+                <th>Last Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 在 Python 代码中，我们必须使⽤括号： board.topics.all() ，因为 all() 是⼀个⽅法。 -->
+            <!-- 在使⽤ Django 模 板语⾔写代码的时候，在⼀个 HTML 模板⽂件⾥⾯，我们不使⽤括号，就只是 board.topics.all 。 -->
+            {% for topic in board.topics.all %}
+                <tr>
+                    <td>{{ topic.subject }}</td>
+                    <td>{{ topic.starter.username }}</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>{{ topic.last_updated }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
