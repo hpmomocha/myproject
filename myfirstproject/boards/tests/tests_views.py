@@ -4,9 +4,9 @@ from django.test import TestCase
 # Create your tests here.
 from django.urls import resolve, reverse
 
-from .forms import NewTopicForm
-from .models import Board, Topic, Post
-from .views import home, board_topics, new_topic
+from boards.forms import NewTopicForm
+from boards.models import Board, Topic, Post
+from boards.views import home, board_topics, new_topic
 
 
 class HomeTests(TestCase):
