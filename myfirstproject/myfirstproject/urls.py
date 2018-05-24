@@ -38,7 +38,11 @@ urlpatterns = [
     url(r'^reset/complete/$',
         auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),
         name='password_reset_complete'),
-
+    url(r'^setting/password/$', auth_views.PasswordChangeView.as_view(template_name='password_change.html'),
+        name='password_change'),
+    url(r'^setting/password/done/$',
+        auth_views.PasswordResetDoneView.as_view(template_name='password_change_done.html'),
+        name='password_change_done'),
     # views.home是视图函数
     url(r'^$', views.home, name='home'),
     url(r'^signup/$', accounts_views.signup, name='signup'),
