@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -25,9 +26,11 @@ def board_topics(request, pk):
     return render(request, 'topics.html', {'board': board})
 
 
+@login_required
 def new_topic(request, pk):
     board = get_object_or_404(Board, pk=pk)
-    user = User.objects.first()
+    # user = User.objects.first()
+    user = request.user
     if request.method == 'POST':
         # 实例化⼀个将 POST 数据传递给 form 的form 实例：
         form = NewTopicForm(request.POST)

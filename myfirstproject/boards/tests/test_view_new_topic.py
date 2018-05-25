@@ -1,77 +1,17 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
-
-# Create your tests here.
-from django.urls import resolve, reverse
+from django.urls import reverse, resolve
 
 from boards.forms import NewTopicForm
 from boards.models import Board, Topic, Post
-from boards.views import home, board_topics, new_topic
-
-
-class HomeTests(TestCase):
-    def setUp(self):
-        self.board = Board.objects.create(name='Django', description='Django Board.')
-        # reverse的第一个参数是urls.py的url中的name
-        url = reverse('home')
-        self.response = self.client.get(url)
-
-    def test_home_view_status_code(self):
-        self.assertEquals(self.response.status_code, 200)
-
-    def test_home_url_resolves_home_view(self):
-        #
-        view = resolve('/')
-        self.assertEquals(view.url_name, 'home')
-        self.assertEquals(view.func, home)
-
-    def test_home_view_contains_link_to_topics_page(self):
-        board_topics_url = reverse('board_topics', kwargs={'pk': self.board.pk})
-        # assertContains ⽅法来测试 response 主体部分是否包含给定的⽂本。
-        # 测试 response 主体是否包含⽂本 href="/boards/1/"
-        self.assertContains(self.response, 'href="{0}"'.format(board_topics_url))
-
-
-class BoardTopicsTests(TestCase):
-    # Django 的测试机制不会针对当前数据库跑你的测试。
-    def setUp(self):
-        Board.objects.create(name='Django', description='Django board')
-
-    def test_board_topics_view_success_status_code(self):
-        url = reverse('board_topics', kwargs={'pk': 1})
-        response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
-
-    def test_board_topics_view_not_found_status_code(self):
-        url = reverse('board_topics', kwargs={'pk': 99})
-        response = self.client.get(url)
-        self.assertEquals(response.status_code, 404)
-
-    def test_board_topics_url_resolves_board_topics_view(self):
-        view = resolve('/boards/1/')
-        self.assertEquals(view.func, board_topics)
-
-    '''
-    def test_board_topics_view_contains_link_back_to_homepage(self):
-        board_topics_url = reverse('board_topics', kwargs={'pk': 1})
-        response = self.client.get(board_topics_url)
-        homepage_url = reverse('home')
-        self.assertContains(response, 'href="{0}"'.format(homepage_url))
-'''
-
-    def test_board_topics_view_contains_navigation_link(self):
-        board_topics_url = reverse('board_topics', kwargs={'pk': 1})
-        response = self.client.get(board_topics_url)
-        new_topic_url = reverse('new_topic', kwargs={'pk': 1})
-        homepage_url = reverse('home')
-        self.assertContains(response, 'href="{0}"'.format(new_topic_url))
-        self.assertContains(response, 'href="{0}"'.format(homepage_url))
+from boards.views import new_topic
 
 
 class NewTopicTests(TestCase):
     def setUp(self):
         Board.objects.create(name='Django', description='Django board')
         User.objects.create_user(username='john', email='john@doe.com', password='123')
+        self.client.login(username='john', password='123')
 
     # 检查发给 view 的请求是否成功
     def test_new_topic_view_success_status_code(self):
@@ -139,3 +79,15 @@ class NewTopicTests(TestCase):
         response = self.client.get(url)
         form = response.context.get('form')
         self.assertIsInstance(form, NewTopicForm)
+
+
+class LoginRequiredNewTopicTests(TestCase):
+    def setUp(self):
+        Board.objects.create(name='Django', description='Django board.')
+        self.url = reverse('new_topic', kwargs={'pk': 1})
+        self.response = self.client.get(self.url)
+
+    def test_redirection(self):
+        login_url = reverse('login')
+        # self.assertRedirects(self.response, '{login_url}?next={url}'.format(login_url=login_url, url=self.url))
+        self.assertRedirects(self.response, f'{login_url}?next={self.url}')
