@@ -23,12 +23,12 @@
         <tbody>
             <!-- 在 Python 代码中，我们必须使⽤括号： board.topics.all() ，因为 all() 是⼀个⽅法。 -->
             <!-- 在使⽤ Django 模 板语⾔写代码的时候，在⼀个 HTML 模板⽂件⾥⾯，我们不使⽤括号，就只是 board.topics.all 。 -->
-            {% for topic in board.topics.all %}
+            {% for topic in topics %}
                 <tr>
-                    <td>{{ topic.subject }}</td>
+                    <td><a href="{% url 'topic_posts' board.pk topic.pk %}">{{ topic.subject }}</a></td>
                     <td>{{ topic.starter.username }}</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td>{{ topic.replies }}</td>
+                    <td>{{ topic.views }}</td>
                     <td>{{ topic.last_updated }}</td>
                 </tr>
             {% endfor %}
