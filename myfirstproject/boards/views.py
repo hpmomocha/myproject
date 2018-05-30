@@ -1,11 +1,9 @@
-
-
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.views.generic import View, UpdateView
+from django.utils.decorators import method_decorator
+from django.views.generic import UpdateView
 
 from .forms import NewTopicForm, PostForm
 from .models import Board, Topic, Post
@@ -82,12 +80,22 @@ def reply_topic(request, pk, topic_pk):
     return render(request, 'reply_topic.html', {'topic': topic, 'form': form})
 
 
+@method_decorator(login_required, name='dispatch')
 class PostUpdateView(UpdateView):
     model = Post
+    # 使⽤ fields 属性来即时创建模型表单
     fields = ('message',)
     template_name = 'edit_post.html'
+    # 系统将使⽤ pk_url_kwarg 来标识⽤于检索 Post 对象的关键字参数的名称
+    # 此处不太明白，需要进一步学习。
     pk_url_kwarg = 'post_pk'
+    # 如果我们没有设置 context_object_name 属性，Post 对象将作为“Object”在模板中可⽤。
+    # 所以，在这⾥我们使⽤ context_object_name 来重命名它来发布
     context_object_name = 'post'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(created_by=self.request.user)
 
     def form_valid(self, form):
         post = form.save(commit=False)
@@ -95,4 +103,3 @@ class PostUpdateView(UpdateView):
         post.updated_at = timezone.now()
         post.save()
         return redirect('topic_posts', pk=post.topic.board.pk, topic_pk=post.topic.pk)
-

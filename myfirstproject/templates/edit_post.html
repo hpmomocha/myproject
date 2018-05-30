@@ -2,6 +2,7 @@
 {% block title %}Edit post{% endblock %}
 {% block breadcrumb %}
     <li class="breadcrumb-item"><a href="{% url 'home' %}">Boards</a></li>
+    <!-- 如果我们没有设置context_object_name 来发布，它将可以被⽤作：object.topic.board.pk。-->
     <li class="breadcrumb-item"><a href="{% url 'board_topics' post.topic.board.pk %}">{{ post.topic.board.name }}</a>
     </li>
     <li class="breadcrumb-item"><a
