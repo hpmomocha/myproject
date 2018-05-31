@@ -4,6 +4,8 @@ from django.urls import reverse, resolve
 from boards.models import Board
 from boards.views import board_topics
 
+from boards.views import TopicListView
+
 
 class BoardTopicsTests(TestCase):
     # Django 的测试机制不会针对当前数据库跑你的测试。
@@ -22,7 +24,10 @@ class BoardTopicsTests(TestCase):
 
     def test_board_topics_url_resolves_board_topics_view(self):
         view = resolve('/boards/1/')
-        self.assertEquals(view.func, board_topics)
+        # FBV
+        # self.assertEquals(view.func, board_topics)
+        # GCBV
+        self.assertEquals(view.func.view_class, TopicListView)
 
     '''
     def test_board_topics_view_contains_link_back_to_homepage(self):

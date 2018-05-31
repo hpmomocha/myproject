@@ -10,7 +10,7 @@
     <div class="mb-4">
         <a href="{% url 'reply_topic' topic.board.pk topic.pk %}" class="btn btn-primary" role="button">Reply</a>
     </div>
-    {% for post in topic.posts.all %}
+    {% for post in posts %}
         <div class="card mb-2 {% if forloop.first %}border-dark{% endif %}">
             {% if forloop.first %}
                 <div class="card-header text-white bg-dark py-2 px-3">{{ topic.subject }}</div>
@@ -19,7 +19,7 @@
                 <div class="row">
                     <div class="col-2">
                         <img src="{% static 'img/avatar.png' %}" alt="{{ post.created_by.username }}" class="w-100">
-                        <small>Post: {{ post.created_by.posts.count }}</small>
+                        <small>Posts: {{ post.created_by.posts.count }}</small>
                     </div>
                     <div class="col-10">
                         <div class="row mb-3">

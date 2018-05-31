@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse, resolve
 
-from ..views import topic_posts
+from ..views import topic_posts, PostListView
 from ..models import Board, Topic, Post
 
 
@@ -20,4 +20,7 @@ class TopicPostsTests(TestCase):
 
     def test_view_function(self):
         view = resolve('/boards/1/topics/1/')
-        self.assertEquals(view.func, topic_posts)
+        # FBV
+        # self.assertEquals(view.func, topic_posts)
+        # GCBV
+        self.assertEquals(view.func.view_class, PostListView)
