@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import UpdateView, ListView
@@ -98,9 +99,14 @@ class PostListView(ListView):
     paginate_by = 2
 
     def get_context_data(self, **kwargs):
-        self.topic.views += 1
-        self.topic.save()
+        session_key = 'viewed_topic_{}'.format(self.topic.pk)
+        if not self.request.session.get(session_key, False):
+            self.topic.views += 1
+            self.topic.save()
+            self.request.session[session_key] = True
+
         kwargs['topic'] = self.topic
+
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
@@ -128,7 +134,17 @@ def reply_topic(request, pk, topic_pk):
             post.created_by = request.user
             post.save()
 
-            return redirect('topic_posts', pk=pk, topic_pk=topic_pk)
+            topic.last_updated = timezone.now()
+            topic.save()
+
+            topic_url = reverse('topic_posts', kwargs={'pk': pk, 'topic_pk': topic_pk})
+            topic_post_url = '{url}?page={page}#{id}'.format(
+                url=topic_url,
+                page=topic.get_page_count(),
+                id=post.pk
+            )
+
+            return redirect(topic_post_url)
     else:
         form = PostForm()
 
